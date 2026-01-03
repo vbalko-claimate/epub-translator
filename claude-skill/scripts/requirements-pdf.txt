@@ -1,0 +1,18 @@
+# PDF Translation Dependencies
+# Install with: pip install -r requirements-pdf.txt
+
+# NOTE: Translation happens via Claude Code subscription (Task subagents),
+# NOT via Claude API. No API key needed!
+
+# Core PDF processing
+PyMuPDF>=1.24.0          # Primary extraction and rebuild engine (fast, layout-preserving)
+pdfplumber>=0.11.0       # Table detection and complex layout analysis (Phase 2)
+pikepdf>=8.0.0           # PDF integrity validation
+
+# Optional: Advanced features (Phase 2+)
+# scikit-learn>=1.3.0    # For multi-column detection (k-means clustering)
+# Pillow>=10.0.0         # For visual comparison screenshots
+
+# Development/Testing
+# pytest>=7.4.0          # For unit tests
+# black>=23.0.0          # Code formatting

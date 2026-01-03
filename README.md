@@ -1,6 +1,6 @@
-# EPUB Translator - Universal AI-Powered Book Translation
+# EPUB & PDF Translator - Universal AI-Powered Book Translation
 
-> Translate EPUB books between languages using AI code assistants while preserving formatting, structure, and metadata.
+> Translate EPUB and PDF books between languages using AI code assistants while preserving formatting, structure, and metadata.
 
 **Works with:** Claude Code, Gemini CLI, Cursor, Codex, GitHub Copilot, and any AI assistant
 
@@ -22,12 +22,14 @@ Want to see real examples? Check out the [Baneblade case study](examples/banebla
 
 ## Features
 
+- ✅ **Dual Format Support** - EPUB (reflowable) and PDF (fixed layout) translation
 - ✅ **Preserves Structure** - HTML/XML tags, CSS styling, and formatting stay intact
+- ✅ **Layout Preservation (PDF)** - Maintains exact text positions, fonts, and coordinates
 - ✅ **Maintains Navigation** - Chapter structure, TOC, and metadata preserved
 - ✅ **Smart Translation** - Protects proper names and technical terms
 - ✅ **Glossary Support** - Use translation dictionaries for consistency (i18n-style)
 - ✅ **Community Glossaries** - Pre-made dictionaries for popular universes (Warhammer 40k, Harry Potter)
-- ✅ **Batch Processing** - Translate multiple chapters in parallel
+- ✅ **Batch Processing** - Translate multiple chapters/pages in parallel
 - ✅ **Universal Compatibility** - Works with ANY AI assistant
 - ✅ **Native Claude Skill** - Fully automated for Claude Code users
 
@@ -43,22 +45,27 @@ Want to see real examples? Check out the [Baneblade case study](examples/banebla
 
 2. **Translate a book:**
    ```bash
+   # For EPUB
    claude "translate this EPUB book from English to Czech: book.epub"
+
+   # For PDF
+   claude "translate this PDF book from English to Czech: book.pdf"
    ```
 
-That's it! Claude will automatically extract, translate, and rebuild your EPUB.
+That's it! Claude will automatically extract, translate, and rebuild your EPUB or PDF.
 
 **📖 [Detailed Installation Guide →](INSTALLATION.md)**
 
 ### Option 2: For All Other AI Assistants (Manual Workflow)
 
+**For EPUB:**
 1. **Extract the EPUB:**
    ```bash
    mkdir epub_workspace
    unzip book.epub -d epub_workspace/
    ```
 
-2. **Use prompt templates** from the [`prompts/`](prompts/) directory:
+2. **Use prompt templates** from [`prompts/`](prompts/) directory:
    - Copy each prompt in sequence
    - Paste into your AI assistant (Claude web, Gemini, Cursor, etc.)
    - Follow the step-by-step instructions
@@ -69,6 +76,16 @@ That's it! Claude will automatically extract, translate, and rebuild your EPUB.
    zip -0 -X ../translated.epub mimetype
    zip -r ../translated.epub META-INF OEBPS
    ```
+
+**For PDF:**
+1. **Install Python dependencies:**
+   ```bash
+   pip install -r claude-skill/scripts/requirements-pdf.txt
+   ```
+
+2. **Use PDF prompt templates** from [`prompts/pdf/`](prompts/pdf/) directory:
+   - Follow 4-step workflow: Extract → Translate → Rebuild → Validate
+   - See [PDF Translation Guide](docs/pdf-translation-guide.md) for details
 
 ## Real-World Example
 
@@ -82,7 +99,9 @@ That's it! Claude will automatically extract, translate, and rebuild your EPUB.
 
 ## How It Works
 
-EPUB files are actually ZIP archives containing XHTML files for each chapter. This workflow:
+### EPUB Translation
+
+EPUB files are ZIP archives containing XHTML files for each chapter. This workflow:
 
 1. **Extracts** the EPUB to access individual chapter files
 2. **Translates** each chapter while preserving HTML structure
@@ -102,7 +121,26 @@ book.epub (ZIP)
     └── images/ (preserve untouched)
 ```
 
-[Learn more about EPUB structure →](docs/how-it-works.md)
+### PDF Translation
+
+PDF files contain coordinate-positioned text. This workflow:
+
+1. **Extracts** text with coordinates, fonts, and metadata to JSON
+2. **Translates** text blocks while applying glossary rules
+3. **Detects overflow** (Czech text longer → reduces font size)
+4. **Rebuilds** PDF using PyMuPDF redaction (replaces text in place)
+
+```
+book.pdf → Extract → JSON files → Translate (Task subagents) → Rebuild → translated.pdf
+
+pdf_workspace/
+├── extracted/     # page_001.json (text + bbox coordinates)
+├── translated/    # page_001.json (+ translations)
+└── output/        # book_translated.pdf
+```
+
+**[Learn more about EPUB structure →](docs/how-it-works.md)**
+**[PDF Translation Guide →](docs/pdf-translation-guide.md)**
 
 ## Supported Languages
 
@@ -115,11 +153,16 @@ Any language pair! Examples:
 
 ## Documentation
 
-- **[How It Works](docs/how-it-works.md)** - Understanding EPUB structure
+### General
+- **[How It Works](docs/how-it-works.md)** - Understanding EPUB & PDF structure
 - **[Glossary System](docs/glossary-system.md)** - 📚 Control translations with dictionaries
 - **[Context Management](docs/context-management.md)** - ⚠️ Critical: Avoid running out of memory
 - **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
 - **[Examples](docs/examples.md)** - Step-by-step walkthrough sessions
+
+### Format-Specific
+- **[PDF Translation Guide](docs/pdf-translation-guide.md)** - 📄 Complete PDF workflow (Extract → Translate → Rebuild → Validate)
+- **[PDF Prompt Templates](prompts/pdf/)** - 4-step manual workflow for any AI assistant
 
 ## Translation Glossaries
 
@@ -161,8 +204,12 @@ claude "translate book.epub using glossary warhammer40k-en-cs.json"
 
 **All users need:**
 - ZIP/UNZIP utilities (built-in on Mac/Linux, install on Windows)
-- An EPUB file to translate
+- An EPUB or PDF file to translate
 - Access to an AI code assistant
+
+**PDF users additionally need:**
+- Python 3.7+ with pip
+- PyMuPDF, pdfplumber, pikepdf (see `requirements-pdf.txt`)
 
 **Claude Code users additionally need:**
 - [Claude Code CLI](https://github.com/anthropics/claude-code) installed
@@ -198,10 +245,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## Roadmap
 
+- [x] **PDF support** (MVP complete! Layout preservation, glossary integration)
+- [ ] **PDF Phase 2:** Multi-column detection, complex tables, better overflow handling
+- [ ] **PDF Phase 3:** Custom font embedding, OCR support for scanned PDFs, code/math auto-detection
 - [ ] Support for more ebook formats (MOBI, AZW3)
 - [ ] GUI application for non-technical users
-- [ ] Translation memory/glossary support
-- [ ] Quality validation checks
+- [ ] Enhanced translation memory/glossary support
 - [ ] Batch translation of multiple books
 
 ## License

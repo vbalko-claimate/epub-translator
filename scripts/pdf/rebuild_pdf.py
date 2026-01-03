@@ -13,11 +13,56 @@ Example:
     # Creates: book_translated.pdf with Czech translations
 """
 
+import sys
+import subprocess
+from pathlib import Path
+
+
+def check_and_install_dependencies():
+    """
+    Check if required dependencies are installed, and install them if missing.
+
+    Required: PyMuPDF (fitz)
+    """
+    required = {
+        'fitz': 'PyMuPDF',
+    }
+
+    missing = []
+
+    for module, package in required.items():
+        try:
+            __import__(module)
+        except ImportError:
+            missing.append(package)
+
+    if missing:
+        print(f"⚠️  Missing dependencies: {', '.join(missing)}", file=sys.stderr)
+        print(f"📦 Installing automatically...\n", file=sys.stderr)
+
+        for package in missing:
+            try:
+                subprocess.check_call(
+                    [sys.executable, "-m", "pip", "install", "--quiet", package],
+                    stdout=subprocess.DEVNULL
+                )
+                print(f"✓ Installed: {package}", file=sys.stderr)
+            except subprocess.CalledProcessError as e:
+                print(f"\n❌ Failed to install {package}", file=sys.stderr)
+                print(f"\nPlease install manually:", file=sys.stderr)
+                print(f"  pip install {package}\n", file=sys.stderr)
+                sys.exit(1)
+
+        print(f"✓ All dependencies installed!\n", file=sys.stderr)
+
+
+# Install dependencies if needed
+check_and_install_dependencies()
+
+# Now import dependencies
 import fitz  # PyMuPDF
 import json
-import sys
 import argparse
-from pathlib import Path
 from typing import Dict, List, Tuple
 
 

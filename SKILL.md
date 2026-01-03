@@ -10,12 +10,37 @@ Automatically translate EPUB and PDF books while preserving all formatting, stru
 
 ## Quick Start
 
+**CRITICAL: When user provides a book file, START IMMEDIATELY - do NOT ask for confirmation or repeat information they already gave you.**
+
+### Automatic Workflow
+
+**When user says:** `"translate [FILE] from [SOURCE_LANG] to [TARGET_LANG]"`
+
+**You IMMEDIATELY:**
+
+1. **Detect format** (check `.epub` or `.pdf` extension)
+2. **Extract file** (run appropriate script)
+3. **Start translation** (launch Task subagents)
+4. **Rebuild book** (run rebuild script)
+5. **Report completion**
+
+**DO NOT:**
+- ❌ Ask for file name again (user already provided it)
+- ❌ Ask for languages again (user already specified them)
+- ❌ Display summary tables before starting
+- ❌ Wait for confirmation
+
+**DO:**
+- ✅ Start extraction immediately
+- ✅ Use glossary if available for the book's universe
+- ✅ Launch parallel Task subagents for translation
+- ✅ Report progress as you work
+
 ### Format Detection
 
-When the user asks to translate a book, **first detect the file format:**
+Check file extension to determine workflow:
 
 ```bash
-# Check file extension
 if [[ "$file" == *.epub ]]; then
   # Use EPUB workflow (below)
 elif [[ "$file" == *.pdf ]]; then
@@ -23,26 +48,22 @@ elif [[ "$file" == *.pdf ]]; then
 fi
 ```
 
-### EPUB Workflow
-
-When the user asks to translate an EPUB book:
+### EPUB Workflow (Auto-Execute)
 
 1. **Extract EPUB** → `./scripts/extract.sh <book.epub>`
-2. **Check for glossary** → Load translation dictionary if user provides one
-3. **Identify content** → Find chapter files in `OEBPS/` directory
-4. **Translate chapters** → Use Task subagents for parallel processing with glossary
-5. **Update metadata** → Change language codes in `content.opf` and `toc.ncx`
+2. **Check for glossary** → Load if available (e.g., warhammer40k-en-cs.json)
+3. **Identify chapters** → Find XHTML files in `OEBPS/`
+4. **Translate chapters** → Launch Task subagents (2 chapters each, 5-10 agents in parallel)
+5. **Update metadata** → Change language codes
 6. **Rebuild EPUB** → `./scripts/rebuild.sh <output.epub>`
 
-### PDF Workflow
-
-When the user asks to translate a PDF book:
+### PDF Workflow (Auto-Execute)
 
 1. **Extract PDF** → `python scripts/pdf/extract_pdf.py <book.pdf>`
-2. **Check for glossary** → Load translation dictionary if user provides one
-3. **Translate pages** → Use Task subagents for parallel processing (5-10 pages per agent)
-4. **Rebuild PDF** → `python scripts/pdf/rebuild_pdf.py <book.pdf> -o pdf_workspace/output/<book>_translated.pdf`
-5. **Validate** → `python scripts/pdf/validate_pdf.py <translated.pdf> --original <book.pdf> --glossary <glossary.json>`
+2. **Check for glossary** → Load if available
+3. **Translate pages** → Launch Task subagents (10 pages each, 5 agents in parallel)
+4. **Rebuild PDF** → `python scripts/pdf/rebuild_pdf.py <book.pdf> -o <output.pdf>`
+5. **Validate** → `python scripts/pdf/validate_pdf.py <output.pdf> --original <book.pdf>`
 
 ## Glossary Support 📚
 
@@ -724,7 +745,37 @@ Located in `./scripts/pdf/` directory:
 - **[../docs/troubleshooting.md](../docs/troubleshooting.md)** - Extended troubleshooting guide
 - **[../docs/glossary-system.md](../docs/glossary-system.md)** - Glossary system (works for both EPUB & PDF)
 
-## Example Session
+## Example Sessions
+
+### EPUB Translation Example
 
 ```
 User: "Translate this EPUB from English to Czech: baneblade.epub"
+
+Skill: [IMMEDIATELY starts - no questions asked]
+1. ✓ Extracting EPUB: baneblade.epub
+2. ✓ Found 31 chapters
+3. ✓ Checking for glossary: warhammer40k-en-cs.json found!
+4. ✓ Launching 6 Task subagents (5 chapters each)
+5. ✓ All chapters translated
+6. ✓ Updating metadata (en-GB → cs-CZ)
+7. ✓ Rebuilding EPUB: baneblade_cs.epub
+
+Done! Your book is ready: baneblade_cs.epub
+```
+
+### PDF Translation Example
+
+```
+User: "Translate this PDF from Czech to English: bitcoin_odluka.pdf"
+
+Skill: [IMMEDIATELY starts - no questions asked]
+1. ✓ Extracting PDF: bitcoin_odluka.pdf (150 pages)
+2. ✓ Launching 15 Task subagents (10 pages each)
+3. ✓ All pages translated
+4. ✓ Rebuilding PDF with translations
+5. ✓ Validating: bitcoin_odluka_en.pdf
+
+Done! Your book is ready: bitcoin_odluka_en.pdf
+Validation: ✓ All checks passed
+```

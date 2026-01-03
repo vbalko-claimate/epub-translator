@@ -5,7 +5,20 @@
 **Works with:** Claude Code, Gemini CLI, Cursor, Codex, GitHub Copilot, and any AI assistant
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub Stars](https://img.shields.io/github/stars/vbalko-claimate/epub-translator?style=social)](https://github.com/vbalko-claimate/epub-translator/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/vbalko-claimate/epub-translator?style=social)](https://github.com/vbalko-claimate/epub-translator/network/members)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![GitHub Issues](https://img.shields.io/github/issues/vbalko-claimate/epub-translator)](https://github.com/vbalko-claimate/epub-translator/issues)
+[![Documentation](https://img.shields.io/badge/docs-complete-blue)](docs/)
+[![Glossaries](https://img.shields.io/badge/glossaries-community-purple)](glossaries/community/)
+
+## See It In Action
+
+**📺 [Live Demo & Screenshots](DEMO.md)** - See what the translation process looks like
+
+**🎬 [Video Tutorial](assets/video/tutorial-link.md)** - 3-minute walkthrough (coming soon)
+
+Want to see real examples? Check out the [Baneblade case study](examples/baneblade-case-study.md) showing a complete 300-page book translation.
 
 ## Features
 
@@ -22,9 +35,10 @@
 
 ### Option 1: For Claude Code Users (Fully Automated)
 
-1. **Install the skill:**
+1. **Clone this repository:**
    ```bash
-   cp -r claude-skill ~/.claude/skills/epub-translator
+   cd ~/.claude/skills/
+   git clone https://github.com/vbalko-claimate/epub-translator.git
    ```
 
 2. **Translate a book:**
@@ -33,6 +47,8 @@
    ```
 
 That's it! Claude will automatically extract, translate, and rebuild your EPUB.
+
+**📖 [Detailed Installation Guide →](INSTALLATION.md)**
 
 ### Option 2: For All Other AI Assistants (Manual Workflow)
 

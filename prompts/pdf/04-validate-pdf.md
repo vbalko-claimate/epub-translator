@@ -25,7 +25,7 @@ Please help me validate the translated PDF using automated checks.
 
 1. **Run validation with all checks:**
    ```bash
-   cd ~/.claude/skills/epub-translator/claude-skill/scripts/pdf
+   cd ~/.claude/skills/epub-translator/scripts/pdf
    python validate_pdf.py pdf_workspace/output/[FILENAME]_translated.pdf \
      --original [FILENAME.pdf] \
      --glossary glossaries/[YOUR_GLOSSARY].json \
@@ -34,7 +34,7 @@ Please help me validate the translated PDF using automated checks.
 
    Or if running from project root:
    ```bash
-   python claude-skill/scripts/pdf/validate_pdf.py \
+   python scripts/pdf/validate_pdf.py \
      pdf_workspace/output/[FILENAME]_translated.pdf \
      --original [FILENAME.pdf] \
      --glossary glossaries/warhammer40k-en-cs.json \

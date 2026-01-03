@@ -90,7 +90,7 @@ This document outlines the remaining steps to publish your universal EPUB transl
   ```
 
 **Test all bash scripts:**
-- [ ] Make scripts executable: `chmod +x claude-skill/scripts/*.sh`
+- [ ] Make scripts executable: `chmod +x scripts/*.sh`
 - [ ] Test extract.sh with a sample EPUB
 - [ ] Test rebuild.sh
 - [ ] Test validate.sh

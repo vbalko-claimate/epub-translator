@@ -154,7 +154,7 @@ git clone https://github.com/vbalko-claimate/epub-translator.git
 **Fix:**
 ```bash
 # Make scripts executable
-chmod +x ~/.claude/skills/epub-translator/claude-skill/scripts/*.sh
+chmod +x ~/.claude/skills/epub-translator/scripts/*.sh
 ```
 
 **Issue:** Claude doesn't recognize the skill
@@ -436,7 +436,7 @@ Scripts need adaptation. See `docs/troubleshooting.md` for Windows-specific comm
 ls ~/.claude/skills/epub-translator/claude-skill/SKILL.md
 
 # 2. Verify scripts are executable
-ls -la ~/.claude/skills/epub-translator/claude-skill/scripts/
+ls -la ~/.claude/skills/epub-translator/scripts/
 # Should show: -rwxr-xr-x (executable)
 
 # 3. Test with Claude
@@ -459,7 +459,7 @@ ls epub-translator/prompts/
 # Should show all 6 .md files
 
 # 2. Verify bash scripts work
-cd epub-translator/claude-skill/scripts/
+cd epub-translator/scripts/
 ./extract.sh
 # Should show usage instructions
 

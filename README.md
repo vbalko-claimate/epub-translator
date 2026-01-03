@@ -80,7 +80,7 @@ That's it! Claude will automatically extract, translate, and rebuild your EPUB o
 **For PDF:**
 1. **Install Python dependencies:**
    ```bash
-   pip install -r claude-skill/scripts/requirements-pdf.txt
+   pip install -r scripts/requirements-pdf.txt
    ```
 
 2. **Use PDF prompt templates** from [`prompts/pdf/`](prompts/pdf/) directory:

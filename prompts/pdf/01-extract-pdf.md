@@ -22,13 +22,13 @@ Please help me extract text with layout information from this PDF using the extr
 
 1. **Run the extraction script:**
    ```bash
-   cd ~/.claude/skills/epub-translator/claude-skill/scripts/pdf
+   cd ~/.claude/skills/epub-translator/scripts/pdf
    python extract_pdf.py /path/to/[FILENAME.pdf]
    ```
 
    Or if running from project root:
    ```bash
-   python claude-skill/scripts/pdf/extract_pdf.py [FILENAME.pdf]
+   python scripts/pdf/extract_pdf.py [FILENAME.pdf]
    ```
 
 2. **Expected output:**

@@ -1,10 +1,10 @@
 ---
-name: epub-translator
+name: book-translator
 description: Translates EPUB and PDF books between languages while preserving formatting, structure, and metadata. Use when translating eBooks, EPUB files, PDF files, or when user asks to translate a book. Handles proper names, technical terms, chapter/page structure preservation, and layout preservation for PDFs.
 allowed-tools: Read, Write, Bash, Glob, Grep, Task
 ---
 
-# EPUB & PDF Translator
+# Book Translator
 
 Automatically translate EPUB and PDF books while preserving all formatting, structure, and metadata.
 

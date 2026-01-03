@@ -23,7 +23,7 @@ Please help me translate the extracted pages using Task subagents for parallel p
 
 1. **Generate subagent prompt (optional helper):**
    ```bash
-   cd ~/.claude/skills/epub-translator/claude-skill/scripts/pdf
+   cd ~/.claude/skills/epub-translator/scripts/pdf
    python translate_pdf.py --generate-prompt \
      --pages 1-10 \
      --source en \

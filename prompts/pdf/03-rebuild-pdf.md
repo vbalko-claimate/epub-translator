@@ -25,7 +25,7 @@ Please help me rebuild the PDF using the PyMuPDF redaction-based replacement met
 
 1. **Run the rebuild script:**
    ```bash
-   cd ~/.claude/skills/epub-translator/claude-skill/scripts/pdf
+   cd ~/.claude/skills/epub-translator/scripts/pdf
    python rebuild_pdf.py [FILENAME.pdf] \
      --output pdf_workspace/output/[FILENAME]_translated.pdf \
      --translated-dir pdf_workspace/translated
@@ -33,7 +33,7 @@ Please help me rebuild the PDF using the PyMuPDF redaction-based replacement met
 
    Or if running from project root:
    ```bash
-   python claude-skill/scripts/pdf/rebuild_pdf.py [FILENAME.pdf] \
+   python scripts/pdf/rebuild_pdf.py [FILENAME.pdf] \
      -o pdf_workspace/output/[FILENAME]_translated.pdf
    ```
 

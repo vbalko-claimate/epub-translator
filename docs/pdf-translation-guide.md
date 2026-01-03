@@ -31,7 +31,7 @@ The PDF translation feature extends epub-translator to support **text-based PDF 
 Install PDF-specific dependencies:
 
 ```bash
-cd ~/.claude/skills/epub-translator/claude-skill/scripts
+cd ~/.claude/skills/epub-translator/scripts
 pip install -r requirements-pdf.txt
 ```
 
@@ -80,17 +80,17 @@ See [Glossary System Guide](glossary-system.md) for details on creating glossari
 
 ```bash
 # Step 1: Extract text with layout info
-python claude-skill/scripts/pdf/extract_pdf.py book.pdf
+python scripts/pdf/extract_pdf.py book.pdf
 
 # Step 2: Translate pages (via Claude Code Task subagents)
 # Use prompts/pdf/02-translate-pages.md in Claude Code conversation
 
 # Step 3: Rebuild PDF with translations
-python claude-skill/scripts/pdf/rebuild_pdf.py book.pdf \
+python scripts/pdf/rebuild_pdf.py book.pdf \
   -o pdf_workspace/output/book_translated.pdf
 
 # Step 4: Validate translated PDF
-python claude-skill/scripts/pdf/validate_pdf.py \
+python scripts/pdf/validate_pdf.py \
   pdf_workspace/output/book_translated.pdf \
   --original book.pdf \
   --glossary glossaries/warhammer40k-en-cs.json
@@ -112,7 +112,7 @@ python claude-skill/scripts/pdf/validate_pdf.py \
 
 **Command:**
 ```bash
-cd ~/.claude/skills/epub-translator/claude-skill/scripts/pdf
+cd ~/.claude/skills/epub-translator/scripts/pdf
 python extract_pdf.py /path/to/book.pdf
 ```
 

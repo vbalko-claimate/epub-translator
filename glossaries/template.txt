@@ -1,0 +1,192 @@
+# EPUB Translation Glossary Template
+# =====================================
+#
+# Instructions:
+# 1. Copy this file and rename it: my-book-[source]-[target].txt
+# 2. Fill in your book's specific terms below
+# 3. Use this glossary when translating chapters
+#
+# Format:
+#   PRESERVE: term                    (never translate)
+#   TRANSLATE: source → target        (always use this translation)
+#   PRESERVE_WITH_GRAMMAR: term       (keep word, apply target language grammar)
+#   CONTEXT: term → explanation       (decide based on context)
+#
+# Tips:
+#   - Add comments (lines starting with #) to explain decisions
+#   - Group similar terms together
+#   - Start small, expand as you find more terms
+#   - Reuse for book sequels!
+#
+# =====================================
+
+# ========== BOOK INFORMATION ==========
+# Title: [Your Book Title]
+# Author: [Author Name]
+# Source Language: [e.g., English]
+# Target Language: [e.g., Czech]
+# Translator: [Your Name]
+# Date Created: [YYYY-MM-DD]
+# Version: 1.0
+
+
+# ========== CHARACTER NAMES ==========
+# Main characters - typically preserve
+# PRESERVE: [Character Name 1]
+# PRESERVE: [Character Name 2]
+# PRESERVE: [Character Name 3]
+
+# Example:
+# PRESERVE: Harry Potter
+# PRESERVE: Hermione Granger
+# PRESERVE: Ron Weasley
+
+
+# ========== PLACE NAMES ==========
+# Real places - translate if target language has established name
+# Fictional places - typically preserve
+# TRANSLATE: [Real Place] → [Translation]
+# PRESERVE: [Fictional Place]
+
+# Examples:
+# TRANSLATE: London → Londýn
+# TRANSLATE: New York → New York (same in Czech)
+# PRESERVE: Hogwarts
+# PRESERVE: Diagon Alley
+
+
+# ========== ORGANIZATIONS ==========
+# Companies, groups, institutions
+# PRESERVE: [Organization Name]
+# TRANSLATE: [Generic Organization] → [Translation]
+
+# Examples:
+# PRESERVE: Stark Industries
+# TRANSLATE: Ministry of Magic → Ministerstvo kouzel
+
+
+# ========== TECHNICAL TERMS ==========
+# Specialized vocabulary, jargon, invented terms
+# PRESERVE_WITH_GRAMMAR: [term]
+# TRANSLATE: [term] → [translation]
+
+# Examples:
+# PRESERVE_WITH_GRAMMAR: lightsaber
+# PRESERVE_WITH_GRAMMAR: TARDIS
+# TRANSLATE: spaceship → kosmická loď
+
+
+# ========== TITLES & RANKS ==========
+# Professional titles, military ranks, nobility
+# TRANSLATE: [Title] → [Translation]
+
+# Examples:
+# TRANSLATE: Doctor → Doktor
+# TRANSLATE: Professor → Profesor
+# TRANSLATE: Captain → Kapitán
+# TRANSLATE: Lord → Lord (or Pán, depending on context)
+
+
+# ========== ITEMS & OBJECTS ==========
+# Magical items, weapons, special objects
+# PRESERVE: [Unique Item Name]
+# TRANSLATE: [Generic Item] → [Translation]
+
+# Examples:
+# PRESERVE: Elder Wand
+# PRESERVE: One Ring
+# TRANSLATE: sword → meč
+# TRANSLATE: shield → štít
+
+
+# ========== CONTEXT-DEPENDENT ==========
+# Words that need different translations in different contexts
+# CONTEXT: [word] → [explanation]
+
+# Examples:
+# CONTEXT: Chapter → "Kapitola" in book headings, "Řád" when referring to Space Marine Chapter
+# CONTEXT: Master → "Mistr" (craftsman) vs "Pán" (lord/owner) depending on context
+
+
+# ========== COMMON TERMS ==========
+# Standard book elements
+TRANSLATE: Chapter → Kapitola
+TRANSLATE: Prologue → Prolog
+TRANSLATE: Epilogue → Epilog
+TRANSLATE: Part → Část
+TRANSLATE: Book → Kniha
+TRANSLATE: Appendix → Dodatek
+
+
+# ========== DIALOGUE MARKERS ==========
+# How to handle speech
+# Note: Most languages have specific quote styles
+# English: "quote"
+# Czech: „quote"
+# German: „quote"
+# French: « quote »
+# Spanish: «quote»
+
+# Quotes will be handled by AI based on target language
+# Add notes here if book uses unusual dialogue formatting
+
+
+# ========== SPECIAL NOTES ==========
+# Add any book-specific translation notes
+
+# Example notes:
+# - Author uses archaic English for royal characters - maintain formal tone in translation
+# - Book includes poems - prioritize meaning over rhyme scheme
+# - Contains made-up words for alien species - preserve all alien terms
+# - Historical fiction set in 1920s - use period-appropriate vocabulary
+
+
+# ========== SERIES CONSISTENCY ==========
+# If this is part of a series, note terms that MUST stay consistent
+
+# Example:
+# This book is part of "The Lord of the Rings" trilogy
+# CRITICAL: Use these exact translations to match published editions:
+# - Middle-earth → Středozem
+# - Shire → Kraj
+# - Hobbit → Hobit
+
+
+# ========== TRANSLATION MEMORY ==========
+# Recurring phrases and their translations
+
+# Example:
+# "As always" → "Jako vždy"
+# "Once upon a time" → "Bylo nebylo"
+# "The end" → "Konec"
+
+
+# ========== REFERENCES TO CHECK ==========
+# External resources consulted
+
+# Examples:
+# - Official [Author Name] Czech translations by [Publisher]
+# - [Series Name] Wiki - Czech version
+# - Community glossary from [Source]
+# - Consultation with native speakers on [Forum/Discord]
+
+
+# ========== VERSION HISTORY ==========
+# Track changes to this glossary
+
+# v1.0 - [Date] - Initial creation
+# v1.1 - [Date] - Added [number] new terms found in chapters 5-10
+# v1.2 - [Date] - Corrected translation of [term] based on reader feedback
+
+
+# =====================================
+# END OF GLOSSARY
+#
+# Total terms: [Count them when done]
+# Last updated: [Date]
+#
+# Ready to use with:
+#   claude "translate book.epub using glossary [this-file.txt]"
+#
+# Or copy terms into manual translation prompts.
+# =====================================

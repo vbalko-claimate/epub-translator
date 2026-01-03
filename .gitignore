@@ -1,0 +1,59 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Thumbnails
+Thumbs.db
+
+# EPUB workspace (user-generated during translation)
+epub_workspace/
+*_workspace/
+
+# Test files
+*.epub
+!examples/*.epub
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.bak
+*~
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# Python (if users add scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+env/
+
+# Node (if users add tools)
+node_modules/
+package-lock.json
+
+# User-specific glossaries (keep template, ignore custom ones)
+glossaries/*.txt
+glossaries/*.csv
+glossaries/*.json
+!glossaries/template.txt
+!glossaries/README.md
+!glossaries/community/**
+
+# Logs
+*.log
+
+# OS
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini

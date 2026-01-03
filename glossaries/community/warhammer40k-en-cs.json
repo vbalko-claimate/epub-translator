@@ -1,0 +1,363 @@
+{
+  "metadata": {
+    "universe": "Warhammer 40,000",
+    "source_language": "en",
+    "target_language": "cs-CZ",
+    "version": "1.0",
+    "author": "Community",
+    "last_updated": "2026-01-03",
+    "notes": "Based on Black Library official translations and Czech fan community consensus. Use for any Warhammer 40k book translation.",
+    "source_materials": [
+      "Official Black Library Czech translations",
+      "Warhammer 40k Czech Wiki",
+      "Fan community discussions"
+    ]
+  },
+
+  "factions": {
+    "Space Marines": {
+      "translation": "Vesmírní mariňáci",
+      "singular": "Vesmírný mariňák",
+      "mode": "translate",
+      "note": "Official term from Czech translations"
+    },
+    "Imperial Guard": {
+      "translation": "Imperiální garda",
+      "mode": "translate",
+      "note": "Later renamed to Astra Militarum in lore"
+    },
+    "Adeptus Astartes": {
+      "translation": "Adeptus Astartes",
+      "mode": "preserve",
+      "note": "Latin name, keep original"
+    },
+    "Chaos": {
+      "translation": "Chaos",
+      "mode": "preserve",
+      "note": "Keep as 'Chaos', use Czech grammar (Chaosu, Chaosem)"
+    },
+    "Orks": {
+      "translation": "Orkové",
+      "singular": "Ork",
+      "mode": "translate"
+    },
+    "Eldar": {
+      "translation": "Eldar",
+      "mode": "preserve",
+      "note": "Race name, no translation"
+    },
+    "Tyranids": {
+      "translation": "Tyranidi",
+      "singular": "Tyranid",
+      "mode": "translate"
+    },
+    "Necrons": {
+      "translation": "Necronové",
+      "singular": "Necron",
+      "mode": "translate"
+    }
+  },
+
+  "military_units": {
+    "Chapter": {
+      "translations": {
+        "as_organization": "Řád",
+        "as_heading": "Kapitola"
+      },
+      "mode": "context",
+      "examples": {
+        "The Ultramarines Chapter": "Řád Ultramariňáků",
+        "Chapter 5": "Kapitola 5"
+      }
+    },
+    "Cadian": {
+      "translation": "Cadianský",
+      "mode": "translate",
+      "note": "Adjective form, use Czech grammar"
+    },
+    "Ultramarines": {
+      "translation": "Ultramariňáci",
+      "mode": "translate"
+    },
+    "Blood Angels": {
+      "translation": "Krvavé andělé",
+      "mode": "translate"
+    },
+    "Dark Angels": {
+      "translation": "Temní andělé",
+      "mode": "translate"
+    },
+    "Space Wolves": {
+      "translation": "Vesmírní vlci",
+      "mode": "translate"
+    }
+  },
+
+  "weapons": {
+    "bolter": {
+      "translation": "bolter",
+      "mode": "preserve_with_grammar",
+      "declension": {
+        "nominative": "bolter",
+        "genitive": "bolteru",
+        "dative": "bolteru",
+        "accusative": "bolter",
+        "vocative": "boltere",
+        "locative": "bolteru",
+        "instrumental": "bolterem"
+      },
+      "note": "Iconic weapon, keep English name but use Czech cases"
+    },
+    "lascannon": {
+      "translation": "lascannon",
+      "mode": "preserve_with_grammar",
+      "note": "Laser cannon, keep English but decline like Czech noun"
+    },
+    "plasma gun": {
+      "translation": "plazmová puška",
+      "mode": "translate"
+    },
+    "melta": {
+      "translation": "melta",
+      "mode": "preserve_with_grammar"
+    },
+    "chainsword": {
+      "translation": "řetězový meč",
+      "mode": "translate"
+    },
+    "power sword": {
+      "translation": "energetický meč",
+      "mode": "translate"
+    },
+    "battle cannon": {
+      "translation": "bojové dělo",
+      "mode": "translate"
+    },
+    "heavy bolter": {
+      "translation": "těžký bolter",
+      "mode": "translate"
+    }
+  },
+
+  "vehicles": {
+    "Baneblade": {
+      "translation": "Baneblade",
+      "mode": "preserve",
+      "note": "Super-heavy tank type name"
+    },
+    "Leman Russ": {
+      "translation": "Leman Russ",
+      "mode": "preserve",
+      "note": "Main battle tank, named after Primarch"
+    },
+    "Chimera": {
+      "translation": "Chimera",
+      "mode": "preserve",
+      "note": "APC type"
+    },
+    "Land Raider": {
+      "translation": "Land Raider",
+      "mode": "preserve"
+    },
+    "Rhino": {
+      "translation": "Rhino",
+      "mode": "preserve"
+    },
+    "Thunderhawk": {
+      "translation": "Thunderhawk",
+      "mode": "preserve"
+    },
+    "Titan": {
+      "translation": "Titán",
+      "mode": "translate",
+      "note": "Generic term for god-machines"
+    }
+  },
+
+  "titles_and_ranks": {
+    "Emperor": {
+      "translation": "Císař",
+      "mode": "context",
+      "rules": {
+        "capitalized_god_emperor": "Emperor",
+        "generic_ruler": "císař"
+      },
+      "examples": {
+        "The Emperor of Mankind": "Císař lidstva",
+        "the Emperor protects": "Císař chrání",
+        "God-Emperor": "Bůh-císař"
+      },
+      "note": "When referring to God-Emperor, can translate or keep 'Emperor' - both used in Czech fandom"
+    },
+    "Primarch": {
+      "translation": "Primarch",
+      "mode": "preserve",
+      "note": "Title for gene-forged sons of the Emperor"
+    },
+    "Chapter Master": {
+      "translation": "Velmistr řádu",
+      "mode": "translate"
+    },
+    "Captain": {
+      "translation": "Kapitán",
+      "mode": "translate"
+    },
+    "Sergeant": {
+      "translation": "Seržant",
+      "mode": "translate"
+    },
+    "Brother": {
+      "translation": "Bratr",
+      "mode": "translate",
+      "context": "when addressing Space Marines"
+    },
+    "Lord": {
+      "translation": "Lord",
+      "mode": "preserve",
+      "note": "Title, keep in English in 40k context"
+    },
+    "Warmaster": {
+      "translation": "Válečný pán",
+      "mode": "translate"
+    }
+  },
+
+  "technology": {
+    "vox": {
+      "translation": "vox",
+      "mode": "preserve_with_grammar",
+      "note": "Communication device, decline as Czech noun"
+    },
+    "augur": {
+      "translation": "augur",
+      "mode": "preserve_with_grammar",
+      "note": "Sensor/scanner device"
+    },
+    "servitor": {
+      "translation": "servitor",
+      "mode": "preserve_with_grammar",
+      "note": "Lobotomized cyborg worker"
+    },
+    "cogitator": {
+      "translation": "kogitátor",
+      "mode": "translate",
+      "note": "Computer/thinking machine"
+    },
+    "promethium": {
+      "translation": "promethium",
+      "mode": "preserve_with_grammar",
+      "note": "Fuel type"
+    },
+    "machine spirit": {
+      "translation": "strojový duch",
+      "mode": "translate"
+    }
+  },
+
+  "religious_terms": {
+    "Omnissiah": {
+      "translation": "Omnissiah",
+      "mode": "preserve",
+      "note": "Machine God of Adeptus Mechanicus"
+    },
+    "Machine God": {
+      "translation": "Strojový bůh",
+      "mode": "translate"
+    },
+    "Emperor's blessing": {
+      "translation": "císařovo požehnání",
+      "mode": "translate"
+    },
+    "Throne of Terra": {
+      "translation": "TrůnTery",
+      "mode": "translate"
+    },
+    "Golden Throne": {
+      "translation": "Zlatý trůn",
+      "mode": "translate"
+    }
+  },
+
+  "places": {
+    "Terra": {
+      "translation": "Terra",
+      "mode": "preserve",
+      "note": "Earth in the 40k universe"
+    },
+    "Mars": {
+      "translation": "Mars",
+      "mode": "preserve",
+      "note": "Same as real planet"
+    },
+    "Holy Terra": {
+      "translation": "Svatá Terra",
+      "mode": "translate"
+    },
+    "Imperium": {
+      "translation": "Impérium",
+      "mode": "translate"
+    },
+    "Warp": {
+      "translation": "Warp",
+      "mode": "preserve",
+      "note": "Hyperspace/Immaterium"
+    },
+    "Eye of Terror": {
+      "translation": "Oko teroru",
+      "mode": "translate"
+    }
+  },
+
+  "common_terms": {
+    "Prologue": {
+      "translation": "Prolog",
+      "mode": "translate"
+    },
+    "Epilogue": {
+      "translation": "Epilog",
+      "mode": "translate"
+    },
+    "Chapter": {
+      "translation": "Kapitola",
+      "mode": "translate",
+      "context": "when used in book chapter headings"
+    },
+    "heretic": {
+      "translation": "heretik",
+      "mode": "translate"
+    },
+    "xenos": {
+      "translation": "xenos",
+      "mode": "preserve",
+      "note": "Term for aliens, keep Latin"
+    },
+    "mutant": {
+      "translation": "mutant",
+      "mode": "translate"
+    },
+    "psyker": {
+      "translation": "psyker",
+      "mode": "preserve_with_grammar",
+      "note": "Psychic individual"
+    }
+  },
+
+  "phrases": {
+    "For the Emperor!": {
+      "translation": "Za císaře!",
+      "mode": "translate"
+    },
+    "In the name of the Emperor": {
+      "translation": "Ve jménu císaře",
+      "mode": "translate"
+    },
+    "Praise the Omnissiah": {
+      "translation": "Chvála Omnissiahovi",
+      "mode": "translate"
+    },
+    "The Emperor protects": {
+      "translation": "Císař chrání",
+      "mode": "translate"
+    }
+  }
+}

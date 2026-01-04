@@ -87,7 +87,10 @@ claude "translate book.epub from Czech to English"
 **What gets preserved:**
 - Text content (100%)
 - Basic formatting (bold, italic)
-- Embedded images
+- Embedded images (JPEG, PNG, GIF, TIFF)
+  - Automatically extracted and embedded in EPUB
+  - Placed at end of each chapter
+  - Small decorative images (<100x100px) filtered out
 - Chapters (heuristic detection)
 
 **What gets lost:**

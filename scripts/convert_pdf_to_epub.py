@@ -66,19 +66,70 @@ import argparse
 
 def extract_pdf_content(pdf_path):
     """
-    Extract text content from PDF with basic structure.
+    Extract text content AND images from PDF with basic structure.
 
     Returns:
-        list of dicts: [{"title": "Chapter 1", "content": "..."}, ...]
+        tuple: (chapters, images)
+        chapters: list of dicts with {"title", "content", "image_refs"}
+        images: dict of {image_id: {"data": bytes, "ext": str, "page": int, "bbox": tuple}}
     """
     doc = fitz.open(pdf_path)
     chapters = []
+    all_images = {}
+    image_counter = 0
 
-    current_chapter = {"title": "Chapter 1", "content": ""}
+    current_chapter = {"title": "Chapter 1", "content": "", "image_refs": []}
     chapter_num = 1
 
     for page_num, page in enumerate(doc, start=1):
         text = page.get_text()
+
+        # Extract images from this page
+        image_list = page.get_images(full=True)
+
+        for img_index, img in enumerate(image_list):
+            xref = img[0]  # Image xref ID
+
+            try:
+                # Extract image data
+                base_image = doc.extract_image(xref)
+                image_data = base_image["image"]  # Binary data
+                image_ext = base_image["ext"]     # Extension (jpg, png, etc.)
+
+                # Get image position on page
+                img_rects = page.get_image_rects(xref)
+                bbox = img_rects[0] if img_rects else page.rect
+
+                # Filter out tiny images (likely decorative)
+                width = bbox.width if hasattr(bbox, 'width') else (bbox[2] - bbox[0])
+                height = bbox.height if hasattr(bbox, 'height') else (bbox[3] - bbox[1])
+
+                if width < 100 or height < 100:
+                    continue  # Skip decorative/small images
+
+                # Store image
+                image_id = f"image_{image_counter:03d}"
+                all_images[image_id] = {
+                    "data": image_data,
+                    "ext": image_ext,
+                    "page": page_num,
+                    "bbox": bbox,
+                    "filename": f"{image_id}.{image_ext}"
+                }
+
+                # Add reference to current chapter
+                y_position = bbox[1] if isinstance(bbox, (list, tuple)) else bbox.y0
+                current_chapter["image_refs"].append({
+                    "id": image_id,
+                    "y_position": y_position,  # Top Y coordinate for ordering
+                    "alt": f"Image {image_counter + 1}"
+                })
+
+                image_counter += 1
+            except Exception as e:
+                # Skip problematic images
+                print(f"Warning: Could not extract image on page {page_num}: {e}", file=sys.stderr)
+                continue
 
         # Simple heuristic: New chapter if page starts with large text
         blocks = page.get_text("dict")["blocks"]
@@ -101,7 +152,7 @@ def extract_pdf_content(pdf_path):
             # Save previous chapter
             chapters.append(current_chapter)
             chapter_num += 1
-            current_chapter = {"title": f"Chapter {chapter_num}", "content": ""}
+            current_chapter = {"title": f"Chapter {chapter_num}", "content": "", "image_refs": []}
 
         # Add page content
         current_chapter["content"] += f"\n\n{text}"
@@ -110,33 +161,46 @@ def extract_pdf_content(pdf_path):
     if current_chapter["content"].strip():
         chapters.append(current_chapter)
 
+    total_pages = len(doc)
     doc.close()
 
     # If only one chapter detected, split by page count
-    if len(chapters) == 1 and len(doc) > 10:
-        # Split into 10-page chunks
+    if len(chapters) == 1 and total_pages > 10:
+        # Split into 10-page chunks (need to redistribute images)
+        old_chapter = chapters[0]
         chapters = []
         doc = fitz.open(pdf_path)
-        for i in range(0, len(doc), 10):
+
+        for i in range(0, total_pages, 10):
             chunk_text = ""
-            for page_num in range(i, min(i + 10, len(doc))):
+            chunk_images = []
+
+            for page_num in range(i, min(i + 10, total_pages)):
                 chunk_text += doc[page_num].get_text() + "\n\n"
 
+                # Find images for this page range
+                for img_ref in old_chapter.get("image_refs", []):
+                    img_page = all_images[img_ref["id"]]["page"]
+                    if img_page >= (i + 1) and img_page <= min(i + 10, total_pages):
+                        chunk_images.append(img_ref)
+
             chapters.append({
-                "title": f"Pages {i+1}-{min(i+10, len(doc))}",
-                "content": chunk_text
+                "title": f"Pages {i+1}-{min(i+10, total_pages)}",
+                "content": chunk_text,
+                "image_refs": chunk_images
             })
         doc.close()
 
-    return chapters
+    return chapters, all_images
 
 
-def create_epub(chapters, output_path, title="Converted Book", author="Unknown"):
+def create_epub(chapters, images, output_path, title="Converted Book", author="Unknown"):
     """
-    Create EPUB from extracted chapters.
+    Create EPUB from extracted chapters AND images.
 
     Args:
-        chapters: List of {"title": str, "content": str}
+        chapters: List of {"title": str, "content": str, "image_refs": list}
+        images: Dict of {image_id: {"data": bytes, "ext": str, ...}}
         output_path: Output EPUB file path
         title: Book title
         author: Book author
@@ -149,7 +213,29 @@ def create_epub(chapters, output_path, title="Converted Book", author="Unknown")
     book.set_language('en')
     book.add_author(author)
 
-    # Create chapters
+    # Add images to EPUB
+    epub_images = {}
+    for image_id, img_data in images.items():
+        epub_img = epub.EpubImage()
+        epub_img.file_name = f'Images/{img_data["filename"]}'
+        epub_img.content = img_data["data"]
+
+        # Determine media type
+        media_type = {
+            'jpg': 'image/jpeg',
+            'jpeg': 'image/jpeg',
+            'png': 'image/png',
+            'gif': 'image/gif',
+            'webp': 'image/webp',
+            'tif': 'image/tiff',
+            'tiff': 'image/tiff'
+        }.get(img_data["ext"].lower(), 'image/jpeg')
+        epub_img.media_type = media_type
+
+        book.add_item(epub_img)
+        epub_images[image_id] = epub_img.file_name
+
+    # Create chapters with embedded images
     epub_chapters = []
     spine = ['nav']
 
@@ -160,16 +246,35 @@ def create_epub(chapters, output_path, title="Converted Book", author="Unknown")
             lang='en'
         )
 
-        # Convert plain text to HTML paragraphs
-        paragraphs = chapter_data["content"].split('\n\n')
+        # Build HTML content with text AND images
         html_content = f'<h1>{chapter_data["title"]}</h1>\n'
 
+        # Convert plain text to HTML paragraphs
+        paragraphs = chapter_data["content"].split('\n\n')
+
+        # Sort images by Y position
+        sorted_images = sorted(
+            chapter_data.get("image_refs", []),
+            key=lambda x: x["y_position"]
+        )
+
+        # Add text paragraphs
         for para in paragraphs:
             para = para.strip()
             if para:
                 # Escape HTML
                 para = para.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
                 html_content += f'<p>{para}</p>\n'
+
+        # Add images at end of chapter content
+        # (Strategy: Simple end-of-chapter placement for reliability)
+        if sorted_images:
+            html_content += '\n'
+            for img_ref in sorted_images:
+                img_path = epub_images[img_ref["id"]]
+                html_content += f'<figure>\n'
+                html_content += f'  <img src="../{img_path}" alt="{img_ref["alt"]}" style="max-width: 100%; height: auto;" />\n'
+                html_content += f'</figure>\n'
 
         chapter.content = html_content
 
@@ -193,7 +298,7 @@ def create_epub(chapters, output_path, title="Converted Book", author="Unknown")
 
 def convert_pdf_to_epub(pdf_path, epub_path=None, verbose=True):
     """
-    Convert PDF to EPUB.
+    Convert PDF to EPUB with text AND images.
 
     Args:
         pdf_path: Input PDF file
@@ -217,24 +322,27 @@ def convert_pdf_to_epub(pdf_path, epub_path=None, verbose=True):
         print(f"Output: {epub_path}")
         print()
 
-    # Extract content
+    # Extract content and images
     if verbose:
-        print("Extracting text from PDF...")
+        print("Extracting text and images from PDF...")
 
-    chapters = extract_pdf_content(str(pdf_file))
+    chapters, images = extract_pdf_content(str(pdf_file))
 
     if verbose:
         print(f"  ✓ Detected {len(chapters)} chapters")
+        print(f"  ✓ Extracted {len(images)} images")
 
-    # Create EPUB
+    # Create EPUB with embedded images
     if verbose:
-        print("Creating EPUB...")
+        print("Creating EPUB with embedded images...")
 
     title = pdf_file.stem.replace('_', ' ').title()
-    create_epub(chapters, str(epub_path), title=title)
+    create_epub(chapters, images, str(epub_path), title=title)
 
     if verbose:
         print(f"\n✓ Conversion complete: {epub_path}")
+        print(f"  Chapters: {len(chapters)}")
+        print(f"  Images: {len(images)}")
         print()
         print("Next steps:")
         print(f'  1. Verify EPUB: open "{epub_path}"')
@@ -242,6 +350,12 @@ def convert_pdf_to_epub(pdf_path, epub_path=None, verbose=True):
         print()
         print("Note: Chapter detection is heuristic. You may need to manually")
         print("      adjust chapter breaks in Calibre or Sigil.")
+        if len(images) > 0:
+            print()
+            print("Image handling:")
+            print(f"  - {len(images)} images extracted and embedded")
+            print("  - Images placed at end of each chapter")
+            print("  - Small images (<100x100px) filtered out")
 
     return True
 

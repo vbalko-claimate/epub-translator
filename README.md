@@ -92,6 +92,13 @@ claude "translate mybook.epub from English to Czech"
 - **Acceptable for:** Technical books with some tables/diagrams
 - **Not suitable for:** Multi-column papers, scanned PDFs, layout-critical documents
 
+**Image handling:**
+- ✅ Extracts embedded images from PDF
+- ✅ Preserves JPEG, PNG, GIF, TIFF formats
+- ✅ Automatically embeds images in EPUB
+- ⚠️ Images placed at end of each chapter
+- ⚠️ Small decorative images (<100x100px) filtered out
+
 **Important:** PDF→EPUB conversion is lossy (layout changes from fixed to reflowable). If you need to preserve exact PDF formatting, use a dedicated PDF editor instead.
 
 ## Real-World Example

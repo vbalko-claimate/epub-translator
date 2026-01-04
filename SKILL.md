@@ -269,18 +269,70 @@ EPUB translation REQUIRES using Task subagents. DO NOT attempt to translate chap
 3. **Memory preservation:** Main conversation stays clean for coordination
 4. **Error recovery:** If one chapter fails, others continue
 
+**Model Selection (Hybrid Approach):**
+
+💡 **Use different models for different complexity levels:**
+
+**Use Haiku (fast & cheap) for:**
+- ✅ Regular chapter content (majority of book)
+- ✅ Straightforward narrative text
+- ✅ Simple dialogue
+- ✅ Books without complex glossaries
+- 💰 **Cost:** ~90% cheaper than Sonnet
+- ⚡ **Speed:** Faster translation
+
+**Use Sonnet (high quality) for:**
+- ✅ Table of Contents (TOC) - needs perfect formatting
+- ✅ Metadata files (content.opf, toc.ncx) - structure-critical
+- ✅ First chapter (sets translation tone/quality baseline)
+- ✅ Complex chapters with heavy glossary usage
+- ✅ Technical/poetic sections requiring nuance
+- 🎯 **Quality:** Better at preserving proper names and structure
+
+**Recommended strategy:**
+1. **TOC, metadata, Chapter 1** → Sonnet (quality baseline)
+2. **Chapters 2-N** → Haiku (bulk translation)
+3. **Final chapter/epilogue** → Sonnet (strong finish)
+
+**How to specify model:**
+```
+Task(
+    subagent_type="general-purpose",
+    prompt="Translate chapters 2-3...",
+    model="haiku",  # or "sonnet"
+    description="Translate chapters 2-3"
+)
+```
+
 **Workflow:**
 
 **Step 3a: Launch parallel subagents (5-10 at once)**
 
+**Example: Hybrid model approach for 30-chapter book**
+
 ```
 Use Task tool to launch multiple agents IN PARALLEL:
-- Agent 1: Translate chapters 1-2
-- Agent 2: Translate chapters 3-4
-- Agent 3: Translate chapters 5-6
-- Agent 4: Translate chapters 7-8
-- Agent 5: Translate chapters 9-10
+
+WAVE 1 (Critical sections - use Sonnet):
+- Agent 1: Translate TOC + metadata (model="sonnet")
+- Agent 2: Translate Chapter 1 (model="sonnet") - sets quality baseline
+
+WAVE 2 (Bulk chapters - use Haiku for cost savings):
+- Agent 3: Translate chapters 2-3 (model="haiku")
+- Agent 4: Translate chapters 4-5 (model="haiku")
+- Agent 5: Translate chapters 6-7 (model="haiku")
+- Agent 6: Translate chapters 8-9 (model="haiku")
+- Agent 7: Translate chapters 10-11 (model="haiku")
+... continue with Haiku for chapters 12-29 ...
+
+WAVE 3 (Final section - use Sonnet for strong finish):
+- Agent N: Translate Chapter 30 + Epilogue (model="sonnet")
 ```
+
+**Cost savings example:**
+- Old approach (all Sonnet): 30 chapters × $X = $30X
+- Hybrid approach: 3 Sonnet + 27 Haiku ≈ $3X + $3X = $6X
+- **Savings: ~80% cost reduction** with minimal quality impact
 
 **Step 3b: Prompt template for EACH subagent:**
 
@@ -504,10 +556,22 @@ Skill: [IMMEDIATELY starts - no questions asked]
 1. ✓ Extracting EPUB: baneblade.epub
 2. ✓ Found 31 chapters
 3. ✓ Checking for glossary: warhammer40k-en-cs.json found!
-4. ✓ Launching 6 Task subagents (5 chapters each)
-5. ✓ All chapters translated
+4. ✓ Using hybrid model approach (Haiku + Sonnet)
+
+   Wave 1 - Critical sections (Sonnet):
+   ✓ Agent 1: TOC + metadata (model=sonnet)
+   ✓ Agent 2: Chapter 1 - Prologue (model=sonnet)
+
+   Wave 2 - Bulk chapters (Haiku for cost savings):
+   ✓ Agent 3-8: Chapters 2-29 (model=haiku, 5 chapters each)
+
+   Wave 3 - Final section (Sonnet):
+   ✓ Agent 9: Chapter 30 + Epilogue (model=sonnet)
+
+5. ✓ All 31 chapters translated
 6. ✓ Updating metadata (en-GB → cs-CZ)
 7. ✓ Rebuilding EPUB: baneblade_cs.epub
 
 Done! Your book is ready: baneblade_cs.epub
+💰 Cost savings: ~80% vs all-Sonnet approach
 ```

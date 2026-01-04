@@ -35,6 +35,21 @@ Automatically translate EPUB books while preserving all formatting, structure, a
 - ✅ Launch parallel Task subagents for translation
 - ✅ Report progress as you work
 
+### Format Detection
+
+**The skill automatically detects file format:**
+
+1. **EPUB files** (.epub extension):
+   - Directly use EPUB translation workflow
+
+2. **PDF files** (.pdf extension):
+   - Auto-convert to EPUB using `scripts/convert_pdf_to_epub.py`
+   - Then proceed with EPUB translation workflow
+
+**Example user requests:**
+- "translate book.epub from Czech to English" → Direct EPUB workflow
+- "translate book.pdf from Czech to English" → Auto-converts to EPUB first
+
 ### EPUB Workflow (Auto-Execute)
 
 1. **Extract EPUB** → `./scripts/extract.sh <book.epub>`
@@ -43,6 +58,54 @@ Automatically translate EPUB books while preserving all formatting, structure, a
 4. **Translate chapters** → Launch Task subagents (2 chapters each, 5-10 agents in parallel)
 5. **Update metadata** → Change language codes
 6. **Rebuild EPUB** → `./scripts/rebuild.sh <output.epub>`
+
+### PDF Support (via EPUB Conversion)
+
+**Workflow:** PDF → EPUB → Translate → EPUB
+
+PDFs are automatically converted to EPUB format, then translated using the existing EPUB workflow.
+
+**Prerequisites:**
+- None! Pure Python solution (auto-installs ALL dependencies on first run)
+
+**Usage:**
+```bash
+# Manual conversion (optional - skill does this automatically)
+python scripts/convert_pdf_to_epub.py book.pdf
+
+# Then translate the EPUB (existing workflow)
+claude "translate book.epub from Czech to English"
+```
+
+**Quality Notes:**
+- ✅ Works well for text-heavy PDFs (novels, simple books)
+- ⚠️ Layout changes: PDF is fixed-layout, EPUB is reflowable
+- ⚠️ Chapter detection is automatic but may need manual verification
+- ⚠️ Complex layouts (multi-column, tables) may simplify
+- ❌ Not suitable for scanned PDFs (requires OCR first)
+
+**What gets preserved:**
+- Text content (100%)
+- Basic formatting (bold, italic)
+- Embedded images
+- Chapters (heuristic detection)
+
+**What gets lost:**
+- Fixed page layout
+- Exact fonts
+- Page numbers
+- Headers/footers (usually removed)
+- Multi-column layouts
+
+**When to use this:**
+- You have a PDF and want an EPUB translation
+- Layout preservation is not critical
+- Content quality matters more than exact formatting
+
+**When NOT to use this:**
+- You need to preserve exact PDF layout
+- Multi-column academic papers (reading order may be wrong)
+- Image-heavy or design-focused PDFs
 
 ## Glossary Support 📚
 

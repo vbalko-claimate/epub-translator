@@ -71,6 +71,29 @@ That's it! Claude will automatically extract, translate, and rebuild your EPUB.
    zip -r ../translated.epub META-INF OEBPS
    ```
 
+### PDF Translation (Optional)
+
+If you have a PDF book, you can convert it to EPUB and then translate it:
+
+**Prerequisites:**
+- None! Pure Python (auto-installs ALL dependencies on first run)
+
+**Workflow:**
+```bash
+# 1. Convert PDF to EPUB
+python scripts/convert_pdf_to_epub.py mybook.pdf
+
+# 2. Translate the EPUB (existing workflow)
+claude "translate mybook.epub from English to Czech"
+```
+
+**Quality expectations:**
+- **Good for:** Novels, simple text books, standard layouts
+- **Acceptable for:** Technical books with some tables/diagrams
+- **Not suitable for:** Multi-column papers, scanned PDFs, layout-critical documents
+
+**Important:** PDF→EPUB conversion is lossy (layout changes from fixed to reflowable). If you need to preserve exact PDF formatting, use a dedicated PDF editor instead.
+
 ## Real-World Example
 
 **Book:** Baneblade by Guy Haley (Warhammer 40k)

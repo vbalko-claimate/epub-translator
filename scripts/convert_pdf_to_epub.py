@@ -273,7 +273,7 @@ def create_epub(chapters, images, output_path, title="Converted Book", author="U
             for img_ref in sorted_images:
                 img_path = epub_images[img_ref["id"]]
                 html_content += f'<figure>\n'
-                html_content += f'  <img src="../{img_path}" alt="{img_ref["alt"]}" style="max-width: 100%; height: auto;" />\n'
+                html_content += f'  <img src="{img_path}" alt="{img_ref["alt"]}" style="max-width: 100%; height: auto;" />\n'
                 html_content += f'</figure>\n'
 
         chapter.content = html_content

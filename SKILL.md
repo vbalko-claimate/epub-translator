@@ -468,6 +468,32 @@ If present, translate:
 
 This compiles everything back into a valid EPUB archive.
 
+**⚠️ CRITICAL: Automatic Verification**
+
+The rebuild script now includes automatic verification:
+1. **File size check** - Warns if files haven't changed from original
+2. **Content directory detection** - Handles OEBPS/, EPUB/, OPS/ automatically
+3. **Rebuild verification** - Compares workspace vs final EPUB
+4. **Checksum validation** - Ensures translated content is actually in EPUB
+
+**If verification fails:**
+```
+✗ Rebuild verification FAILED
+
+The rebuilt EPUB does NOT match the workspace!
+
+Possible causes:
+  1. Translation agents didn't save files properly
+  2. Wrong workspace directory used
+  3. Files were reverted after translation
+```
+
+**Fix:**
+1. Check that translation agents used Write/Edit tools (not just Read)
+2. Verify files in `epub_workspace/translated/OEBPS/` or `EPUB/` are actually translated
+3. Compare file sizes between workspace and original
+4. Re-run translation if needed
+
 ### Step 7: Validate
 
 ```bash
@@ -539,6 +565,22 @@ Located in `./scripts/` directory:
 ### Issue: TOC Not Updating
 **Cause:** Forgot to translate `toc.ncx` navigation file
 **Fix:** Find and translate all `<text>` elements in `toc.ncx`
+
+### Issue: Rebuilt EPUB Contains Original Text (Not Translated)
+**Symptom:** Workspace files are translated, but final EPUB contains original language
+**Cause:** Translation agents didn't save files, or rebuild used wrong directory
+**Detection:** Rebuild verification will catch this automatically
+**Fix:**
+1. Check workspace files: `ls -lh epub_workspace/translated/OEBPS/*.xhtml` or `EPUB/*.xhtml`
+2. Compare sizes to original: `ls -lh epub_workspace/original/OEBPS/*.xhtml`
+3. If sizes are identical, translation didn't happen - re-run translation
+4. If sizes differ but EPUB is wrong, check:
+   - Translation agents used Edit/Write tools (not just Read)
+   - Agents saved to correct paths (epub_workspace/translated/...)
+   - No errors in agent logs
+5. Manually verify rebuild: `./scripts/verify_rebuild.sh <epub_file>`
+
+**Prevention:** The rebuild script now automatically detects this issue and warns you
 
 ## Reference Documentation
 

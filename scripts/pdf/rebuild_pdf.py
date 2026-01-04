@@ -66,7 +66,11 @@ import argparse
 from typing import Dict, List, Tuple, Optional
 
 # Phase 2: Import text matcher for fuzzy matching
-from text_matcher import find_text_in_page
+try:
+    from scripts.pdf.text_matcher import find_text_in_page
+except ImportError:
+    # Fallback for when running from scripts/pdf/ directory
+    from text_matcher import find_text_in_page
 
 
 def rebuild_pdf_with_translations(
@@ -206,15 +210,21 @@ def rebuild_pdf_with_translations(
                     blocks_on_page += 1
 
                 except Exception as e:
+                    # Always print errors to stderr, not just in verbose mode
+                    print(f"    ⚠ Warning: Could not redact block: {e}", file=sys.stderr)
                     if verbose:
-                        print(f"    Warning: Could not redact block: {e}")
+                        import traceback
+                        traceback.print_exc()
 
         # Apply all redactions on this page
         try:
             page.apply_redactions()
         except Exception as e:
+            # Always print critical errors to stderr
+            print(f"  ⚠ Page {page_num:3d}: Redaction failed: {e}", file=sys.stderr)
             if verbose:
-                print(f"  ⚠ Page {page_num:3d}: Redaction failed: {e}")
+                import traceback
+                traceback.print_exc()
             continue
 
         total_blocks += blocks_on_page

@@ -383,7 +383,7 @@ After testing, these might come up:
 **Potential improvements:**
 - Add EPUBCheck integration to validate.sh
 - Create Python wrapper for cross-platform compatibility
-- Add support for other formats (PDF, MOBI)
+- Add support for other formats (MOBI, AZW3)
 - GUI for non-technical users
 
 ---

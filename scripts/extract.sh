@@ -34,8 +34,9 @@ if [ ! -f "$EPUB_FILE" ]; then
     exit 1
 fi
 
-# Check if file is a ZIP archive (EPUB is ZIP)
-if ! file "$EPUB_FILE" | grep -q "Zip archive"; then
+# Check if file is a valid ZIP archive (EPUB is ZIP)
+# Use unzip -t for reliable detection (file command output varies)
+if ! unzip -t "$EPUB_FILE" >/dev/null 2>&1; then
     echo -e "${RED}Error: '$EPUB_FILE' is not a valid EPUB file (not a ZIP archive)${NC}"
     exit 1
 fi

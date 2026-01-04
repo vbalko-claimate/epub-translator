@@ -401,19 +401,100 @@ After translating both chapters, report completion.
 
 **Important:** If glossary is provided, pass the SAME glossary to EVERY subagent for consistency!
 
-**Step 3c: Monitor progress**
+**Step 3c: Validate Each Translation (CRITICAL!)**
 
-Use TodoWrite to track:
+⚠️ **MANDATORY VALIDATION AFTER EACH SUBAGENT:**
+
+After EVERY Task subagent completes, you MUST validate the translation using the validation script.
+
+**Why validation is critical:**
+- Task subagents can fail silently
+- Partial translations create broken EPUBs
+- Detects Czech text that wasn't translated
+- Enables automatic retry on failure
+
+**Validation workflow:**
+
+```bash
+# After Task subagent finishes translating chapter(s), run:
+python3 scripts/validate_translation.py epub_workspace/translated/OEBPS/chap_001.xhtml 1.0
+
+# Exit code 0 = SUCCESS (< 1% Czech characters)
+# Exit code 1 = FAILED (>= 1% Czech characters - needs retry)
 ```
-[ ] Chapters 1-2 (Agent 1) - in_progress
-[ ] Chapters 3-4 (Agent 2) - in_progress
-[ ] Chapters 5-6 (Agent 3) - in_progress
+
+**Complete validation procedure:**
+
+1. **After each Task completes, validate ALL files it translated:**
+   ```bash
+   # If agent translated chapters 2-3:
+   python3 scripts/validate_translation.py epub_workspace/translated/OEBPS/chap_002.xhtml
+   python3 scripts/validate_translation.py epub_workspace/translated/OEBPS/chap_003.xhtml
+   ```
+
+2. **Check exit codes:**
+   - Exit code 0 → ✅ Translation valid, mark todo as completed
+   - Exit code 1 → ❌ Translation failed, needs retry
+
+3. **Handle failures:**
+   ```
+   IF validation fails:
+       1. Retry SAME Task subagent (up to 2 retries total)
+       2. Use SAME prompt and model
+       3. Validate again after retry
+       4. If still fails after 2 retries → STOP and report error to user
+   ```
+
+4. **Report status clearly:**
+   ```
+   ✅ Chapter 2: PASS (0.00% Czech)
+   ✅ Chapter 3: PASS (0.01% Czech)
+   ❌ Chapter 5: FAILED (8.2% Czech) - retrying...
+   ```
+
+**Example validation in practice:**
+
+```
+User request: Translate chapters 2-5
+
+Step 1: Launch Task subagent for chapters 2-3
+Step 2: Wait for completion
+Step 3: Validate chapters 2-3:
+    $ python3 scripts/validate_translation.py epub_workspace/translated/OEBPS/chap_002.xhtml
+    chap_002.xhtml: PASS: 0.00% Czech characters
+
+    $ python3 scripts/validate_translation.py epub_workspace/translated/OEBPS/chap_003.xhtml
+    chap_003.xhtml: FAILED: 5.2% Czech characters (threshold: 1.0%)
+
+Step 4: Chapter 3 failed → Retry Task subagent for chapter 3 only
+Step 5: Validate again:
+    $ python3 scripts/validate_translation.py epub_workspace/translated/OEBPS/chap_003.xhtml
+    chap_003.xhtml: PASS: 0.02% Czech characters
+
+Step 6: All validated → Continue to chapters 4-5
+```
+
+**CRITICAL RULES:**
+- ❌ NEVER proceed to Step 4 (metadata) until ALL chapters validated
+- ❌ NEVER rebuild EPUB with failed validations
+- ✅ ALWAYS validate EVERY chapter translated by subagents
+- ✅ ALWAYS retry failed chapters (max 2 retries)
+- ✅ ALWAYS report validation results to user
+
+**Step 3d: Monitor progress**
+
+Use TodoWrite to track translation AND validation:
+```
+[✓] Chapters 1-2 (Agent 1) - completed + validated
+[✓] Chapters 3-4 (Agent 2) - completed + validated
+[in_progress] Chapters 5-6 (Agent 3) - translating...
+[pending] Chapters 7-8 (Agent 4)
 ...
 ```
 
-Mark completed as subagents finish.
+Mark completed ONLY after validation passes.
 
-**Step 3d: Handle large books (30+ chapters)**
+**Step 3e: Handle large books (30+ chapters)**
 
 For very large books:
 1. Process in waves of 10 chapters (5 agents × 2 chapters each)
@@ -554,6 +635,7 @@ Located in `./scripts/` directory:
 | `extract.sh` | Extract EPUB to workspace | `./extract.sh book.epub` |
 | `rebuild.sh` | Compile translated EPUB | `./rebuild.sh output.epub` |
 | `validate.sh` | Check EPUB integrity | `./validate.sh book.epub` |
+| `validate_translation.py` | Validate chapter translation completeness | `python3 validate_translation.py chap_001.xhtml [threshold]` |
 
 ## Common Issues
 
@@ -568,6 +650,32 @@ Located in `./scripts/` directory:
 ### Issue: TOC Not Updating
 **Cause:** Forgot to translate `toc.ncx` navigation file
 **Fix:** Find and translate all `<text>` elements in `toc.ncx`
+
+### Issue: Partial Translation (Mixed Languages in EPUB)
+**Symptom:** Final EPUB contains mix of source and target language (e.g., English + Czech)
+**Cause:** Task subagent failed silently or didn't complete translation
+**Detection:** Use validation script after EACH translation:
+```bash
+python3 scripts/validate_translation.py epub_workspace/translated/OEBPS/chap_003.xhtml
+# Output: "FAILED: 5.2% Czech characters (threshold: 1.0%)"
+```
+**Fix:**
+1. **Immediately after Task subagent completes**, validate translation:
+   ```bash
+   python3 scripts/validate_translation.py <chapter_file>
+   ```
+2. If validation fails (exit code 1):
+   - Retry the SAME Task subagent with SAME prompt
+   - Validate again after retry
+   - Max 2 retries before reporting error to user
+3. **NEVER proceed to next chapter** until current one validates
+4. **NEVER rebuild EPUB** until ALL chapters validate
+
+**Prevention:**
+- Follow Step 3c validation workflow (mandatory)
+- Validate EVERY chapter after Task subagent
+- Track validation status in TodoWrite
+- Stop immediately if validation fails after 2 retries
 
 ### Issue: Rebuilt EPUB Contains Original Text (Not Translated)
 **Symptom:** Workspace files are translated, but final EPUB contains original language
@@ -605,18 +713,31 @@ Skill: [IMMEDIATELY starts - no questions asked]
 
    Wave 1 - Critical sections (Sonnet):
    ✓ Agent 1: TOC + metadata (model=sonnet)
+   ✓ Validating: TOC (PASS: 0.00% Czech)
    ✓ Agent 2: Chapter 1 - Prologue (model=sonnet)
+   ✓ Validating: Chapter 1 (PASS: 0.00% Czech)
 
    Wave 2 - Bulk chapters (Haiku for cost savings):
-   ✓ Agent 3-8: Chapters 2-29 (model=haiku, 5 chapters each)
+   ✓ Agent 3: Chapters 2-6 (model=haiku)
+   ✓ Validating: Chapters 2-6 (all PASS)
+   ✓ Agent 4: Chapters 7-11 (model=haiku)
+   ✓ Validating: Chapters 7-11 (all PASS)
+   ⚠ Agent 5: Chapters 12-16 (model=haiku)
+   ❌ Validating: Chapter 14 FAILED (3.2% Czech) - retrying...
+   ✓ Retry: Chapter 14 (PASS: 0.01% Czech)
+   ✓ Agent 6-7: Chapters 17-29 (model=haiku)
+   ✓ Validating: Chapters 17-29 (all PASS)
 
    Wave 3 - Final section (Sonnet):
-   ✓ Agent 9: Chapter 30 + Epilogue (model=sonnet)
+   ✓ Agent 8: Chapter 30 + Epilogue (model=sonnet)
+   ✓ Validating: Chapter 30, Epilogue (all PASS)
 
-5. ✓ All 31 chapters translated
+5. ✓ All 31 chapters translated and validated
 6. ✓ Updating metadata (en-GB → cs-CZ)
 7. ✓ Rebuilding EPUB: baneblade_cs.epub
+8. ✓ Verifying rebuild integrity
 
 Done! Your book is ready: baneblade_cs.epub
+✅ Translation: 31/31 chapters validated (100%)
 💰 Cost savings: ~80% vs all-Sonnet approach
 ```

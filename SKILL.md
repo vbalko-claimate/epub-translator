@@ -277,25 +277,41 @@ EPUB translation REQUIRES using Task subagents. DO NOT attempt to translate chap
 💡 **Use different models for different complexity levels:**
 
 **Use Haiku (fast & cheap) for:**
-- ✅ Regular chapter content (majority of book)
 - ✅ Straightforward narrative text
-- ✅ Simple dialogue
+- ✅ Simple dialogue without idioms
+- ✅ Technical/non-fiction books
 - ✅ Books without complex glossaries
 - 💰 **Cost:** ~90% cheaper than Sonnet
 - ⚡ **Speed:** Faster translation
+- ⚠️ **Warning:** More literal, less nuanced - may miss idioms/atmosphere
 
-**Use Sonnet (high quality) for:**
+**Use Sonnet (high quality - RECOMMENDED for literary works) for:**
 - ✅ Table of Contents (TOC) - needs perfect formatting
 - ✅ Metadata files (content.opf, toc.ncx) - structure-critical
 - ✅ First chapter (sets translation tone/quality baseline)
+- ✅ **Literary fiction** - better at preserving style, atmosphere, idioms
+- ✅ **Complex dialogue** - understands context and subtext
+- ✅ **Poetic/metaphorical language** - captures nuance
 - ✅ Complex chapters with heavy glossary usage
-- ✅ Technical/poetic sections requiring nuance
-- 🎯 **Quality:** Better at preserving proper names and structure
+- 🎯 **Quality:** Superior literary translation, natural flow
+- 📖 **Best for:** Novels, creative writing, character-driven stories
 
 **Recommended strategy:**
+
+**For LITERARY FICTION (novels, creative writing):**
+- 🥇 **Best Quality:** Use Sonnet for ALL chapters
+  - Superior literary translation
+  - Natural idioms and atmosphere
+  - Worth the extra cost for quality
+
+**For COST SAVINGS (hybrid approach):**
 1. **TOC, metadata, Chapter 1** → Sonnet (quality baseline)
 2. **Chapters 2-N** → Haiku (bulk translation)
 3. **Final chapter/epilogue** → Sonnet (strong finish)
+4. **Any complex/poetic chapters** → Sonnet (quality critical)
+
+**For TECHNICAL/NON-FICTION:**
+- Use Haiku for all chapters (straightforward content)
 
 **How to specify model:**
 ```
@@ -346,7 +362,62 @@ Files:
 - epub_workspace/translated/OEBPS/[CHAPTER_1.xhtml]
 - epub_workspace/translated/OEBPS/[CHAPTER_2.xhtml]
 
-CRITICAL RULES:
+========== TRANSLATION QUALITY GUIDELINES ==========
+
+⚠️ CRITICAL: This is LITERARY translation, not word-for-word conversion!
+
+**Your goal: Translate the STORY, ATMOSPHERE, and MEANING - not just words.**
+
+QUALITY PRINCIPLES:
+
+1. **Translate meaning and context, not literal words**
+   - Understand the scene/emotion before translating
+   - Preserve author's intent and tone
+   - BAD: Word-by-word literal translation
+   - GOOD: Natural-sounding narrative in target language
+
+2. **Preserve style and atmosphere**
+   - Maintain tension in action scenes
+   - Keep intimacy in dialogue
+   - Preserve humor, sarcasm, formality
+   - Match sentence rhythm and flow
+
+3. **Handle idioms and expressions naturally**
+   - Don't translate idioms literally
+   - Find equivalent expressions in target language
+   - Example (EN→CS):
+     - "It's raining cats and dogs" → "Leje jako z konve" (not "Prší kočky a psy")
+     - "Break a leg!" → "Zlom vaz!" (not "Zlom nohu!")
+
+4. **Cultural adaptation when needed**
+   - Adapt measurements if natural (miles → kilometry)
+   - Keep cultural references understandable
+   - Add brief context if critical reference is obscure
+
+5. **Maintain readability and flow**
+   - Read your translation aloud mentally
+   - Would a native speaker say it this way?
+   - Adjust word order for natural target language syntax
+   - Break long sentences if needed for clarity
+
+6. **Character voice consistency**
+   - Formal characters speak formally
+   - Young characters use modern language
+   - Maintain individual speech patterns
+
+EXAMPLE - Good vs. Bad Translation:
+
+SOURCE (EN): "The Emperor protects," Cortein muttered, his voice barely a whisper as he gripped the controls.
+
+❌ BAD (literal CS): "Císař chrání," Cortein mumlal, jeho hlas sotva šepot když sevřel ovládání.
+(Grammar broken, sounds robotic, loses atmosphere)
+
+✅ GOOD (natural CS): "Císař chrání," zamumlal Cortein, jeho hlas sotva slyšitelný, když sevřel ovládací páky.
+(Flows naturally, preserves tension, sounds like Czech prose)
+
+========== END QUALITY GUIDELINES ==========
+
+TECHNICAL RULES:
 
 1. Read each XHTML file using Read tool
 2. Translate ONLY text inside <p>, <h1>, <h2>, <span> tags

@@ -9,9 +9,11 @@ PyMuPDF>=1.24.0          # Primary extraction and rebuild engine (fast, layout-p
 pdfplumber>=0.11.0       # Table detection and complex layout analysis (Phase 2)
 pikepdf>=8.0.0           # PDF integrity validation
 
-# Optional: Advanced features (Phase 2+)
-# scikit-learn>=1.3.0    # For multi-column detection (k-means clustering)
-# Pillow>=10.0.0         # For visual comparison screenshots
+# Phase 2 Features (now enabled)
+scikit-learn>=1.3.0      # Multi-column layout detection (k-means clustering)
+Pillow>=10.0.0           # Visual comparison screenshots with diff highlighting
+numpy>=1.24.0            # Image diff calculations
+python-Levenshtein>=0.21.0  # Faster fuzzy text matching (optional, falls back to difflib)
 
 # Development/Testing
 # pytest>=7.4.0          # For unit tests

@@ -395,6 +395,295 @@ def generate_visual_comparison(
         return False
 
 
+# Phase 2: Enhanced Visual Comparison Functions
+
+def pix_to_pil(pix: fitz.Pixmap):
+    """
+    Convert PyMuPDF Pixmap to PIL Image.
+
+    Args:
+        pix: PyMuPDF Pixmap object
+
+    Returns:
+        PIL Image object
+    """
+    try:
+        from PIL import Image
+        import io
+
+        # Get PNG bytes from pixmap
+        png_bytes = pix.tobytes("png")
+
+        # Load as PIL Image
+        return Image.open(io.BytesIO(png_bytes))
+    except ImportError:
+        return None
+
+
+def create_diff_image(img1, img2, threshold: int = 30):
+    """
+    Create visual diff highlighting differences between two images.
+
+    Args:
+        img1, img2: PIL Image objects
+        threshold: Pixel difference threshold (0-255)
+
+    Returns:
+        PIL Image with differences highlighted in red/yellow
+    """
+    try:
+        import numpy as np
+
+        # Ensure same size
+        if img1.size != img2.size:
+            img2 = img2.resize(img1.size)
+
+        # Convert to numpy arrays
+        arr1 = np.array(img1)
+        arr2 = np.array(img2)
+
+        # Compute absolute difference
+        diff = np.abs(arr1.astype(int) - arr2.astype(int))
+
+        # Create mask where difference exceeds threshold
+        mask = np.any(diff > threshold, axis=-1)
+
+        # Create output image (start with img2)
+        output = arr2.copy()
+
+        # Highlight differences in red/yellow overlay
+        output[mask] = output[mask] // 2 + np.array([128, 64, 0])  # Red-yellow tint
+
+        from PIL import Image
+        return Image.fromarray(output.astype(np.uint8))
+    except ImportError:
+        return None
+
+
+def create_side_by_side_comparison(
+    original_pdf: str,
+    translated_pdf: str,
+    page_nums: List[int],
+    output_dir: str = "pdf_workspace/comparison",
+    include_diff: bool = True,
+    verbose: bool = True
+) -> bool:
+    """
+    Generate side-by-side comparison images with optional diff overlay.
+
+    Creates images with 2 or 3 panels:
+    - Panel 1: Original page
+    - Panel 2: Translated page
+    - Panel 3 (if include_diff): Diff visualization
+
+    Args:
+        original_pdf: Path to original PDF
+        translated_pdf: Path to translated PDF
+        page_nums: Page numbers to compare (1-indexed)
+        output_dir: Output directory for comparison images
+        include_diff: Include diff panel (default: True)
+        verbose: Print progress messages
+
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        from PIL import Image, ImageDraw
+        import numpy as np
+    except ImportError:
+        if verbose:
+            print("  ⚠ Pillow not installed, skipping enhanced comparison")
+            print("  Install with: pip install Pillow numpy")
+        return False
+
+    if verbose:
+        print(f"5. Side-by-Side Visual Comparison (Phase 2)")
+        print(f"   Generating comparison images for pages: {page_nums}")
+
+    try:
+        original_doc = fitz.open(original_pdf)
+        translated_doc = fitz.open(translated_pdf)
+
+        output_path = Path(output_dir)
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        for page_num in page_nums:
+            if page_num > len(original_doc) or page_num > len(translated_doc):
+                continue
+
+            idx = page_num - 1
+
+            # Render both pages as pixmaps
+            original_page = original_doc[idx]
+            translated_page = translated_doc[idx]
+
+            original_pix = original_page.get_pixmap(dpi=150)
+            translated_pix = translated_page.get_pixmap(dpi=150)
+
+            # Convert to PIL Images
+            original_img = pix_to_pil(original_pix)
+            translated_img = pix_to_pil(translated_pix)
+
+            if not original_img or not translated_img:
+                continue
+
+            # Create diff if requested
+            if include_diff:
+                diff_img = create_diff_image(original_img, translated_img)
+
+                if diff_img:
+                    # Concatenate horizontally: Original | Translated | Diff
+                    total_width = original_img.width * 3
+                    max_height = max(original_img.height, translated_img.height, diff_img.height)
+
+                    combined = Image.new('RGB', (total_width, max_height), (255, 255, 255))
+                    combined.paste(original_img, (0, 0))
+                    combined.paste(translated_img, (original_img.width, 0))
+                    combined.paste(diff_img, (original_img.width * 2, 0))
+                else:
+                    # Fallback to 2 panels if diff failed
+                    total_width = original_img.width * 2
+                    max_height = max(original_img.height, translated_img.height)
+
+                    combined = Image.new('RGB', (total_width, max_height), (255, 255, 255))
+                    combined.paste(original_img, (0, 0))
+                    combined.paste(translated_img, (original_img.width, 0))
+            else:
+                # Just original | translated
+                total_width = original_img.width * 2
+                max_height = max(original_img.height, translated_img.height)
+
+                combined = Image.new('RGB', (total_width, max_height), (255, 255, 255))
+                combined.paste(original_img, (0, 0))
+                combined.paste(translated_img, (original_img.width, 0))
+
+            # Save
+            output_file = output_path / f"page_{page_num:03d}_sidebyside.png"
+            combined.save(str(output_file))
+
+            if verbose:
+                panels = "3 panels" if (include_diff and diff_img) else "2 panels"
+                print(f"   ✓ Page {page_num}: {output_file.name} ({panels})")
+
+        original_doc.close()
+        translated_doc.close()
+
+        if verbose:
+            print(f"   ✓ Comparison images saved to: {output_dir}/\n")
+
+        return True
+
+    except Exception as e:
+        if verbose:
+            print(f"   ✗ Error: {e}\n")
+        return False
+
+
+def visualize_overflow_regions(
+    translated_pdf: str,
+    translated_json_dir: str,
+    output_dir: str = "pdf_workspace/comparison",
+    verbose: bool = True
+) -> bool:
+    """
+    Highlight text blocks that had overflow warnings with bounding boxes.
+
+    Reads translated JSON files to find overflow_warning=True blocks,
+    then renders PDF pages with red rectangles around those regions.
+
+    Args:
+        translated_pdf: Path to translated PDF
+        translated_json_dir: Directory with translated JSON files
+        output_dir: Output directory for overflow visualizations
+        verbose: Print progress messages
+
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        from PIL import ImageDraw
+    except ImportError:
+        if verbose:
+            print("  ⚠ Pillow not installed, skipping overflow visualization")
+        return False
+
+    if verbose:
+        print(f"6. Overflow Region Visualization (Phase 2)")
+
+    try:
+        doc = fitz.open(translated_pdf)
+        output_path = Path(output_dir)
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        json_path = Path(translated_json_dir)
+        overflow_pages = []
+
+        for page_num in range(1, len(doc) + 1):
+            json_file = json_path / f"page_{page_num:03d}.json"
+
+            if not json_file.exists():
+                continue
+
+            with open(json_file, "r", encoding="utf-8") as f:
+                page_data = json.load(f)
+
+            # Find blocks with overflow warnings
+            overflow_blocks = [
+                block for block in page_data.get("blocks", [])
+                if block.get("overflow_warning", False)
+            ]
+
+            if not overflow_blocks:
+                continue
+
+            overflow_pages.append(page_num)
+
+            # Render page
+            page = doc[page_num - 1]
+            pix = page.get_pixmap(dpi=150)
+            img = pix_to_pil(pix)
+
+            if not img:
+                continue
+
+            # Draw rectangles around overflow regions
+            draw = ImageDraw.Draw(img)
+
+            for block in overflow_blocks:
+                bbox = block["bbox"]
+                # Convert PDF coordinates to image coordinates (DPI scaling)
+                scale = 150 / 72  # 150 DPI / 72 points per inch
+                x0, y0, x1, y1 = [coord * scale for coord in bbox]
+
+                # Draw red rectangle
+                draw.rectangle([x0, y0, x1, y1], outline=(255, 0, 0), width=3)
+
+                # Add label with font size info
+                original_size = block.get("size", 12)
+                suggested_size = block.get("suggested_size", original_size)
+                label = f"{original_size:.1f}→{suggested_size:.1f}pt"
+                draw.text((x0, y0 - 15), label, fill=(255, 0, 0))
+
+            # Save
+            output_file = output_path / f"page_{page_num:03d}_overflow.png"
+            img.save(str(output_file))
+
+            if verbose:
+                print(f"   ✓ Page {page_num}: {len(overflow_blocks)} overflow regions highlighted")
+
+        doc.close()
+
+        if verbose:
+            print(f"   Total pages with overflow: {len(overflow_pages)}\n")
+
+        return True
+
+    except Exception as e:
+        if verbose:
+            print(f"   ✗ Error: {e}\n")
+        return False
+
+
 def main():
     """Command-line interface for PDF validation."""
     parser = argparse.ArgumentParser(
@@ -420,7 +709,26 @@ def main():
     parser.add_argument(
         "--visual",
         metavar="PAGES",
-        help="Generate visual comparison for pages (e.g., '1,5,10')"
+        help="Generate visual comparison for pages (e.g., '1,5,10') - Phase 1"
+    )
+
+    # Phase 2: Enhanced visual comparison arguments
+    parser.add_argument(
+        "--visual-diff",
+        metavar="PAGES",
+        help="Generate side-by-side comparison with diff overlay (e.g., '1,5,10') - Phase 2"
+    )
+
+    parser.add_argument(
+        "--visual-overflow",
+        action="store_true",
+        help="Visualize overflow regions on translated PDF (requires --translated-dir) - Phase 2"
+    )
+
+    parser.add_argument(
+        "--translated-dir",
+        default="pdf_workspace/translated",
+        help="Directory with translated JSON files for overflow visualization (default: pdf_workspace/translated)"
     )
 
     parser.add_argument(
@@ -480,6 +788,29 @@ def main():
             verbose
         )
         results.append(("Visual Comparison", visual_ok))
+
+    # Phase 2: Enhanced visual comparison (if requested)
+    if args.visual_diff and args.original:
+        page_nums = [int(p.strip()) for p in args.visual_diff.split(",")]
+        sidebyside_ok = create_side_by_side_comparison(
+            args.original,
+            args.translated_pdf,
+            page_nums,
+            args.comparison_dir,
+            include_diff=True,
+            verbose=verbose
+        )
+        results.append(("Side-by-Side Comparison", sidebyside_ok))
+
+    # Phase 2: Overflow visualization (if requested)
+    if args.visual_overflow:
+        overflow_ok = visualize_overflow_regions(
+            args.translated_pdf,
+            args.translated_dir,
+            args.comparison_dir,
+            verbose=verbose
+        )
+        results.append(("Overflow Visualization", overflow_ok))
 
     # Summary
     if verbose:

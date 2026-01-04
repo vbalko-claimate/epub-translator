@@ -65,6 +65,9 @@ import json
 import argparse
 from typing import Dict, List, Tuple
 
+# Phase 2: Import layout detection for multi-column support
+from layout_detection import detect_columns, reorder_blocks_by_reading_order
+
 
 def classify_text_type(bbox: List[float], font_size: float, page_rect: fitz.Rect) -> str:
     """
@@ -185,7 +188,8 @@ def extract_page_text(page: fitz.Page) -> Dict:
 def extract_pdf(
     pdf_path: str,
     output_dir: str = "pdf_workspace/extracted",
-    verbose: bool = True
+    verbose: bool = True,
+    detect_columns_flag: bool = False
 ) -> Tuple[int, int]:
     """
     Extract all pages from PDF to JSON files.
@@ -231,6 +235,19 @@ def extract_pdf(
     for page in doc:
         page_data = extract_page_text(page)
         page_num = page_data["page_num"]
+
+        # Phase 2: Optional column detection and reordering
+        if detect_columns_flag:
+            layout = detect_columns(page_data["blocks"], page_data["width"])
+            page_data["layout"] = layout
+            page_data["blocks"] = reorder_blocks_by_reading_order(
+                page_data["blocks"],
+                layout
+            )
+
+            if verbose and layout.get("num_columns", 1) > 1:
+                print(f"  ✓ Page {page_num:3d}: Detected {layout['type']} layout (confidence: {layout['confidence']:.2f})")
+
         block_count = len(page_data["blocks"])
         total_blocks += block_count
 
@@ -241,7 +258,10 @@ def extract_pdf(
             json.dump(page_data, f, ensure_ascii=False, indent=2)
 
         if verbose:
-            print(f"  ✓ Page {page_num:3d}: {block_count:4d} text blocks → {output_file.name}")
+            blocks_text = f"{block_count:4d} text blocks"
+            if detect_columns_flag and "layout" in page_data:
+                blocks_text += f" ({page_data['layout']['type']})"
+            print(f"  ✓ Page {page_num:3d}: {blocks_text} → {output_file.name}")
 
     # Close PDF
     doc.close()
@@ -280,13 +300,21 @@ def main():
         help="Suppress progress messages"
     )
 
+    # Phase 2: Multi-column layout detection argument
+    parser.add_argument(
+        "--detect-columns",
+        action="store_true",
+        help="Enable multi-column layout detection for better reading order (Phase 2)"
+    )
+
     args = parser.parse_args()
 
     try:
         extract_pdf(
             pdf_path=args.pdf_file,
             output_dir=args.output_dir,
-            verbose=not args.quiet
+            verbose=not args.quiet,
+            detect_columns_flag=args.detect_columns
         )
         return 0
 

@@ -63,14 +63,21 @@ check_and_install_dependencies()
 import fitz  # PyMuPDF
 import json
 import argparse
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
+
+# Phase 2: Import text matcher for fuzzy matching
+from text_matcher import find_text_in_page
 
 
 def rebuild_pdf_with_translations(
     original_pdf_path: str,
     translated_dir: str,
     output_pdf_path: str,
-    verbose: bool = True
+    verbose: bool = True,
+    fuzzy_matching: bool = False,
+    fuzzy_threshold: float = 0.85,
+    match_strategies: Optional[List[str]] = None,
+    verbose_matching: bool = False
 ) -> Tuple[int, int, int]:
     """
     Rebuild PDF by replacing text with translations using redaction.
@@ -155,18 +162,33 @@ def rebuild_pdf_with_translations(
                 overflow_on_page += 1
 
             # Search for original text in PDF
-            # PyMuPDF search_for returns list of Rect objects where text found
-            text_instances = page.search_for(original_text)
+            # Phase 2: Use multi-strategy text matching if enabled
+            if fuzzy_matching:
+                text_instances, match_strategy = find_text_in_page(
+                    page=page,
+                    target_text=original_text,
+                    bbox=bbox,
+                    strategies=match_strategies,
+                    fuzzy_threshold=fuzzy_threshold,
+                    verbose=verbose_matching
+                )
 
-            if not text_instances:
-                # Try searching for first few words if full text not found
-                words = original_text.split()[:3]
-                if words:
-                    text_instances = page.search_for(" ".join(words))
+                # Log non-standard matches
+                if verbose and match_strategy not in ["exact", "bbox"]:
+                    print(f"    Used {match_strategy} matching for: {original_text[:50]}...")
+            else:
+                # Original logic (Phase 1): exact match with fallbacks
+                text_instances = page.search_for(original_text)
 
-            # If still not found, use bbox from JSON
-            if not text_instances:
-                text_instances = [fitz.Rect(bbox)]
+                if not text_instances:
+                    # Try searching for first few words if full text not found
+                    words = original_text.split()[:3]
+                    if words:
+                        text_instances = page.search_for(" ".join(words))
+
+                # If still not found, use bbox from JSON
+                if not text_instances:
+                    text_instances = [fitz.Rect(bbox)]
 
             # Add redaction annotation for each instance
             for inst_rect in text_instances:
@@ -257,6 +279,33 @@ def main():
         help="Suppress progress messages"
     )
 
+    # Phase 2: Fuzzy text matching arguments
+    parser.add_argument(
+        "--fuzzy-matching",
+        action="store_true",
+        help="Enable fuzzy text matching for better accuracy (Phase 2)"
+    )
+
+    parser.add_argument(
+        "--fuzzy-threshold",
+        type=float,
+        default=0.85,
+        help="Minimum similarity ratio for fuzzy match (default: 0.85, range: 0-1)"
+    )
+
+    parser.add_argument(
+        "--match-strategies",
+        nargs="+",
+        default=None,
+        help="Text matching strategies to try in order (default: exact normalized first_words fuzzy bbox)"
+    )
+
+    parser.add_argument(
+        "--verbose-matching",
+        action="store_true",
+        help="Print which matching strategy was used for each block"
+    )
+
     args = parser.parse_args()
 
     try:
@@ -264,7 +313,11 @@ def main():
             original_pdf_path=args.pdf_file,
             translated_dir=args.translated_dir,
             output_pdf_path=args.output,
-            verbose=not args.quiet
+            verbose=not args.quiet,
+            fuzzy_matching=args.fuzzy_matching,
+            fuzzy_threshold=args.fuzzy_threshold,
+            match_strategies=args.match_strategies,
+            verbose_matching=args.verbose_matching
         )
         return 0
 

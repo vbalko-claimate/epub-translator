@@ -231,6 +231,41 @@ Output as: glossaries/[book-slug]-[source]-[target].txt
 
 ## Workflow
 
+### 💡 Skip Permissions Mode Recommendation (Optional)
+
+**Consider suggesting skip-permissions mode to the user before starting:**
+
+```
+"I recommend running this translation with --dangerously-skip-permissions for a smoother experience:
+
+claude --dangerously-skip-permissions "translate book.epub from [SOURCE] to [TARGET]"
+
+Benefits:
+✅ Auto-approves all file operations (no manual confirmations)
+✅ Much faster - saves 10-50+ approvals for validation scripts
+✅ Designed to be safe with built-in validation
+
+Would you like to proceed with skip-permissions mode, or continue with manual approvals?"
+```
+
+**When to recommend skip-permissions:**
+- ✅ Books with 10+ chapters (many validation runs)
+- ✅ User seems comfortable with automation
+- ✅ Batch translation workflows
+
+**When NOT to recommend:**
+- ❌ User explicitly wants control over every step
+- ❌ First-time users who want to see the process
+- ❌ Testing/debugging scenarios
+
+**How skill handles skip-permissions mode:**
+- All validation scripts run automatically
+- File edits proceed without pauses
+- TodoWrite updates show progress clearly
+- Final validation still runs before rebuild
+
+---
+
 ### Step 1: Setup Workspace
 
 ```bash
@@ -718,6 +753,21 @@ Located in `./scripts/` directory:
 **Cause:** Incorrect rebuild order (mimetype must be first and uncompressed)
 **Fix:** Use provided `rebuild.sh` script - it handles this correctly
 
+### Issue: Too Many Approval Requests
+**Symptom:** Claude asks for approval for every validation script run (10-50+ times)
+**Cause:** Each `python3 scripts/validate_translation.py` requires manual approval
+**Fix:** Use skip-permissions flag for automatic approval:
+```bash
+claude --dangerously-skip-permissions "translate book.epub from Czech to English"
+```
+**Benefits:**
+- Auto-approves all file operations
+- Much faster workflow (no interruptions)
+- Validation still runs, just without approval prompts
+- Safe - skill has built-in validation and error handling
+
+**Alternative:** Add permissions to `.claude/permissions.json` (more complex)
+
 ### Issue: TOC Not Updating
 **Cause:** Forgot to translate `toc.ncx` navigation file
 **Fix:** Find and translate all `<text>` elements in `toc.ncx`
@@ -775,6 +825,15 @@ python3 scripts/validate_translation.py epub_workspace/translated/OEBPS/chap_003
 
 ```
 User: "Translate this EPUB from English to Czech: baneblade.epub"
+
+Skill: I recommend using --dangerously-skip-permissions for a smoother experience:
+
+  claude --dangerously-skip-permissions "translate baneblade.epub from English to Czech"
+
+This auto-approves validation scripts (saves 30+ manual approvals).
+Proceed with skip-permissions mode?
+
+User: "Yes, use skip-permissions"
 
 Skill: [IMMEDIATELY starts - no questions asked]
 1. ✓ Extracting EPUB: baneblade.epub

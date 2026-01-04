@@ -46,6 +46,17 @@ Want to see real examples? Check out the [Baneblade case study](examples/banebla
    claude "translate this EPUB book from English to Czech: book.epub"
    ```
 
+3. **💡 Consider skipping permissions** (optional but recommended):
+   ```bash
+   claude --dangerously-skip-permissions "translate this EPUB book from English to Czech: book.epub"
+   ```
+
+   **Why skip permissions?**
+   - ✅ Auto-approves all file operations (no manual confirmations)
+   - ✅ Much faster workflow (10-50+ chapters = 10-50+ approvals saved)
+   - ✅ Automatic validation runs without interruption
+   - ⚠️ Trade-off: Less control, but skill is designed to be safe
+
 That's it! Claude will automatically extract, translate, and rebuild your EPUB.
 
 **📖 [Detailed Installation Guide →](INSTALLATION.md)**
